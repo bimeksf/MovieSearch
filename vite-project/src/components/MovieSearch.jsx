@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState , useEffect,useCallback } from "react";
 
 import Movie from "./Movie";
 export default function MovieSearch() {
@@ -8,35 +8,55 @@ export default function MovieSearch() {
 
   const apikey = import.meta.env.VITE_API_KEY;
 
-  const searchMovie = async (e) => {
-    e.preventDefault();
 
+
+
+
+  const searchMovie = useCallback(async () => {
+    if(query.length <3)
+      
+  {    setMovie([])
+      
+      return}
+  
     const url = `https://api.themoviedb.org/3/search/movie?api_key=${apikey}&language=en-US&query=${query}&page=1&include_adult=false`;
-
+  
     try {
       const response = await fetch(url);
-
+  
       const data = await response.json();
-
+  
       setMovie(data.results || [])
-
+  
       console.log(data);
     } catch (err) {
       console.error(err);
     }
-  };
+  }, [query, apikey]);
+  useEffect(() => {
+    const debounce = setTimeout(() => {
+      searchMovie();
+    }, 400);
 
-  const movies = movie.filter( movie => movie.poster_path).map((movie)=>< Movie key={movie.id}  movie={movie} />
+    return () => clearTimeout(debounce);
+  }, [query,searchMovie ]);
 
-)
 
 
+
+  const movies = movie.filter( movie => movie.poster_path).map((movie)=>< Movie key={movie.id}  movie={movie} />)
+
+function handleSubmit(e){
+  e.preventDefault()
+  searchMovie()
+
+}
 
 
   return (
     <>
 
-      <form onSubmit={searchMovie} className="flex justify-center items-center p-4 gap-1">
+      <form onSubmit={handleSubmit} className="flex justify-center items-center p-4 gap-1">
        
           <input
             type="text"
